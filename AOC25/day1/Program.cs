@@ -28,7 +28,7 @@ string[] z = File.ReadAllLines(baseDir + "input.txt");
     Console.WriteLine(count);
 }
 
-///Golfed char count: 159
+///Golfed char count: 158
 { 
-int a=50,c=0,h=100,k,p;foreach(var l in z){k=int.Parse(l[1..]);p=a;a=(l[0]<77?a-k+h*k:a+k)%h;c+=l[0]<77?(p<a&p>0|a<1?1:0):p>a?1:0;c+=k/h;}Console.WriteLine(c);
+int a=50,c=0,h=100,k,p;foreach(var l in z){k=int.Parse(l[1..]);p=a;a=(l[0]<77?a-k+h*k:a+k)%h;c+=(l[0]<77?(p<a&p>0|a<1?1:0):p>a?1:0)+k/h;}Console.WriteLine(c);
 }
