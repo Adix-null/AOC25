@@ -8,29 +8,30 @@ namespace day_1
         {
             string[] z = File.ReadAllLines(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName + "\\input.txt");
             // Normal
-
-            int dial = 50;
-            int count = 0;
-            foreach (string line in z)
             {
-                string cleanLine = line.Replace("R", "").Replace("L", "");
-                int k = int.Parse(cleanLine);
-                int prev = dial;
-                if (line[0] == 'L')
+                int dial = 50;
+                int count = 0;
+                foreach (string line in z)
                 {
-                    dial = ((dial - k) + 100 * k) % 100;
-                    if ((prev <= dial && prev != 0) || dial == 0)
-                        count++;
+                    string cleanLine = line.Replace("R", "").Replace("L", "");
+                    int k = int.Parse(cleanLine);
+                    int prev = dial;
+                    if (line[0] == 'L')
+                    {
+                        dial = ((dial - k) + 100 * k) % 100;
+                        if ((prev <= dial && prev != 0) || dial == 0)
+                            count++;
+                    }
+                    if (line[0] == 'R')
+                    {
+                        dial = (dial + k) % 100;
+                        if (prev >= dial || dial == 0)
+                            count++;
+                    }
+                    count += k / 100;
                 }
-                if (line[0] == 'R')
-                {
-                    dial = (dial + k) % 100;
-                    if (prev >= dial || dial == 0)
-                        count++;
-                }
-                count += k / 100;
+                Console.WriteLine(count);
             }
-            Console.WriteLine(count);
 
             // Golfed char count: 158
             {
