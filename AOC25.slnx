@@ -2,4 +2,5 @@
   <Project Path="AOC25/day1/day 1.csproj" />
   <Project Path="AOC25/day2/day 2.csproj" />
   <Project Path="AOC25/day3/day 3.csproj" />
+  <Project Path="AOC25/day4/day 4.csproj" />
 </Solution>
