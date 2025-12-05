@@ -1,7 +1,5 @@
 ﻿// https://adventofcode.com/2025/day/4
 
-using System.Linq;
-
 namespace day_4
 {
     public class Program
