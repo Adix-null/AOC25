@@ -1,7 +1,5 @@
 ﻿// https://adventofcode.com/2025/day/6
 
-using System.Collections.Generic;
-
 namespace day_6
 {
     public class Program
