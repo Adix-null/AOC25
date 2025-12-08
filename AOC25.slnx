@@ -7,4 +7,5 @@
   <Project Path="AOC25/day6/day 6.csproj" />
   <Project Path="AOC25/day7/day 7.csproj" />
   <Project Path="AOC25/day8/day 8.csproj" />
+  <Project Path="AOC25/day9/day 9.csproj" />
 </Solution>
