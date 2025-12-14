@@ -1,6 +1,7 @@
 ﻿// https://adventofcode.com/2025/day/10
 
 using System.Numerics;
+using System.Reflection.Emit;
 
 namespace day_10
 {
@@ -8,7 +9,7 @@ namespace day_10
     {
         internal static void Main()
         {
-            string[] z = File.ReadAllLines(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName + "\\test.txt");
+            string[] z = File.ReadAllLines(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName + "\\input.txt");
             // Normal
             {
                 List<List<int>> goals = z.Select(l => l.Split(" ")[0][1..^1].Select(c => c == '#' ? 1 : 0).ToList()).ToList();
@@ -16,13 +17,11 @@ namespace day_10
                 List<List<List<int>>> combos = z.Select(l => l.Split(" ")[1..^1].Select(n => n[1..^1].Split(",").Select(int.Parse).ToList()).ToList()).ToList();
                 List<List<List<int>>> joltageComboList = [];
                 List<List<int>> joltageComboListSub = [];
-                List<int> sequences = [];
+                List<Fraction> smallest = [];
 
                 int sum = 0;
                 for (int i = 0; i < z.Length; i++)
                 {
-                    sequences = [];
-                    tryNewCombo(i);
                     joltageComboList.Add(joltageComboListSub);
 
                     int lowest = combos[i].Count;
@@ -123,11 +122,11 @@ namespace day_10
                     }
                     for (int y = 0; y < matrix.GetLength(1) - 1; y++)
                     {
-                        Console.WriteLine("Column " + y + ": " + (ConstrainedColumns.Contains(y) ? "C" : "F"));
+                        //Console.WriteLine("Column " + y + ": " + (ConstrainedColumns.Contains(y) ? "C" : "F"));
                     }
                     for (int x = 0; x < matrix.GetLength(0); x++)
                     {
-                        Console.WriteLine("Row " + x + ": " + (eliminatedRows.Contains(x) ? "E" : "0"));
+                        //Console.WriteLine("Row " + x + ": " + (eliminatedRows.Contains(x) ? "E" : "0"));
                     }
                     printMatrix(matrix);
                     Console.WriteLine("Gaussian elimination complete");
@@ -135,181 +134,91 @@ namespace day_10
                     List<int> allColumns = Enumerable.Range(0, matrix.GetLength(1) - 1).ToList();
                     List<int> freeColumns = allColumns.Except(ConstrainedColumns).ToList();
 
+                    List<int> attempts = Enumerable.Repeat(0, freeColumns.Count).ToList();
+                    int attMax = 500;
 
-
-                    //int numFree = freeColumns.Count;
-                    //var solutions = new List<Dictionary<int, long>>(); // store integer solutions
-
-                    //void Enumerate(int freeIndex, Dictionary<int, long> current)
-                    //{
-                    //    if (freeIndex == numFree)
-                    //    {
-                    //        // All free variables assigned, compute constrained variables
-                    //        var solution = new Dictionary<int, long>(current);
-
-                    //        foreach (int row in eliminatedRows)
-                    //        {
-                    //            // pivot column
-                    //            int pivotCol = ConstrainedColumns[eliminatedRows.IndexOf(row)];
-
-                    //            Fraction rhs = matrix[row, matrix.GetLength(1) - 1];
-                    //            Fraction sum = new Fraction(0);
-
-                    //            for (int c = 0; c < matrix.GetLength(1) - 1; c++)
-                    //            {
-                    //                if (c == pivotCol) continue;
-                    //                if (freeColumns.Contains(c))
-                    //                    sum += matrix[row, c] * new Fraction(current[c]);
-                    //                else
-                    //                    sum += matrix[row, c] * new Fraction(0); // should be 0
-                    //            }
-
-                    //            Fraction val = rhs - sum;
-
-                    //            // Check non-negative integer
-                    //            if (val < new Fraction(0) || val.Den != 1)
-                    //                return; // invalid solution
-
-                    //            solution[pivotCol] = val.Num;
-                    //        }
-
-                    //        solutions.Add(solution);
-                    //        return;
-                    //    }
-
-                    //    int freeCol = freeColumns[freeIndex];
-
-                    //    // Compute bounds for this free variable from all rows
-                    //    Fraction lower = new Fraction(0);
-                    //    Fraction upper = new Fraction(long.MaxValue); // start large
-
-                    //    foreach (int row in eliminatedRows)
-                    //    {
-                    //        Fraction rhs = matrix[row, matrix.GetLength(1) - 1];
-                    //        Fraction coeff = matrix[row, freeCol];
-                    //        if (coeff == new Fraction(0)) continue;
-
-                    //        Fraction sum = new Fraction(0);
-                    //        for (int c = 0; c < matrix.GetLength(1) - 1; c++)
-                    //        {
-                    //            if (c == freeCol) continue;
-                    //            if (freeColumns.Contains(c) && current.ContainsKey(c))
-                    //                sum += matrix[row, c] * new Fraction(current[c]);
-                    //            // else unknown free variable not yet assigned, treat as 0 for upper bound
-                    //        }
-
-                    //        Fraction bound = (rhs - sum) / coeff;
-
-                    //        if (coeff > new Fraction(0))
-                    //        {
-                    //            if (bound < upper) upper = bound;
-                    //        }
-                    //        else
-                    //        {
-                    //            if (bound > lower) lower = bound;
-                    //        }
-                    //    }
-
-                    //    // Enumerate all integer values within [lower, upper]
-                    //    long start = (long)Math.Ceiling((double)lower.Num / lower.Den);
-                    //    long end = (long)Math.Floor((double)upper.Num / upper.Den);
-
-                    //    for (long val = start; val <= end; val++)
-                    //    {
-                    //        current[freeCol] = val;
-                    //        Enumerate(freeIndex + 1, current);
-                    //        current.Remove(freeCol);
-                    //    }
-                    //}
-
-                    //// Call with empty assignment
-                    //Enumerate(0, []);
-                    //var maxValues = new Dictionary<int, long>();
-
-                    //foreach (int freeCol in freeColumns)
-                    //{
-                    //    long maxVal = solutions.Max(sol => sol[freeCol]);
-                    //    maxValues[freeCol] = maxVal;
-                    //}
-
-                    //// 'solutions' now contains all valid integer solutions
-                    //foreach (var kv in maxValues)
-                    //{
-                    //    Console.WriteLine($"x[{kv.Key}] max = {kv.Value}");
-                    //}
-                    for (int a1 = 0; a1 < 500; a1++)
+                    bool end = false;
+                    List<Fraction> buttonSums = [];
+                    List<Fraction> prevSums = Enumerable.Repeat(new Fraction(-999), eliminatedRows.Count).ToList();
+                    while (!end && freeColumns.Count != 0)
                     {
-                        for (int a2 = 0; a2 < 500; a2++)
+                        Fraction buttonSum = new(0);
+                        for (int l = 0; l < attempts.Count; l++)
                         {
-                            Fraction buttonSum = new(0);
-                            for (int k = 0; k < eliminatedRows.Count; k++)
+                            buttonSum += new Fraction(attempts[l]);
+                        }
+                        for (int k = 0; k < eliminatedRows.Count; k++)
+                        {
+                            Fraction cellSum = new(0);
+                            for (int l = 0; l < freeColumns.Count; l++)
                             {
-                                for (int l = 0; l < freeColumns.Count; l++)
-                                {
-                                    buttonSum += (matrix[k, l] * new Fraction(-a1)) + matrix[k, matrix.GetLength(1) - 1];
-
-                                }
+                                cellSum += matrix[eliminatedRows[k], freeColumns[l]] * new Fraction(-attempts[l]);
                             }
-                        }
-                    }
-
-                }
-                Console.WriteLine(sum);
-
-
-                void tryNewCombo(int i)
-                {
-                    //base case
-                    if (sequences.Count == combos[i].Count)
-                    {
-                        if(isJoltageCorrect(sequences, i) == 0)
-                        {
-                            joltageComboListSub.Add(sequences);
-                        }
-                        sequences.RemoveAt(sequences.Count - 1);
-                    }
-                    else
-                    {
-                        int maxJolt = 0;
-                        for (int j = 0; j < combos[i][sequences.Count].Count; j++)
-                        {
-                            if (joltages[i][combos[i][sequences.Count][j]] > maxJolt)
-                                maxJolt = joltages[i][combos[i][sequences.Count][j]];
-                        }
-                        bool ovf = false;
-                        for (int j = 0; j < maxJolt && !ovf; j++)
-                        {
-                            sequences.Add(j);
-                            if (isJoltageCorrect(sequences, i) != 1)
+                            cellSum += matrix[eliminatedRows[k], matrix.GetLength(1) - 1];
+                                buttonSum += cellSum;
+                            if (cellSum < new Fraction(0))
                             {
-                                tryNewCombo(i);
+                                if (prevSums[k] > cellSum)
+                                {
+                                    buttonSum = new Fraction(-1);
+                                    attempts[0] = attMax + 1;
+                                    break;
+                                }
                             }
                             else
                             {
-                                sequences.RemoveAt(sequences.Count - 1);
+                                prevSums[k] = cellSum;
                             }
                         }
-                    }
-                }
-                int isJoltageCorrect(List<int> sequences, int i)
-                {
-                    List<int> joltList = Enumerable.Range(0, joltages[i].Count).ToList();
-                    for (int j = 0; j < sequences.Count; j++)
-                    {
-                        for (int k = 0; k < combos[i][j].Count; k++)
+                        if (buttonSum == new Fraction(-1))
                         {
-                            joltList[combos[i][j][k]] += sequences[j];
-                            if (joltList[combos[i][j][k]] > joltages[i][k])
-                                return 1;
+                            attempts[0] = attMax + 1;
+                        }
+                        else
+                        {
+                            buttonSums.Add(buttonSum);
+                            attempts[0]++;
+                        }
+                        for (int j = 0; j < attempts.Count - 1; j++)
+                        {
+                            if (attempts[j] > attMax)
+                            {
+                                attempts[j] = 0;
+                                attempts[j + 1]++;
+                            }                            
+                        }
+                        if (attempts[^1] > attMax)
+                        {
+                            end = true;
                         }
                     }
-                    for (int j = 0; j < joltages[i].Count; j++)
+                    if (freeColumns.Count == 0)
                     {
-                        if (joltList[j] != joltages[i][j])
-                            return -1;
+                        Fraction trivialsum = new(0);
+                        for (int j = 0; j < matrix.GetLength(0); j++)
+                        {
+                            trivialsum += matrix[j, matrix.GetLength(1) - 1];
+                        }
+                        smallest.Add(trivialsum);
                     }
-                    return 0;
+                    else
+                    {
+                        smallest.Add(buttonSums.Min());
+                    }
+                    if(smallest[^1].Den != 1)
+                    {
+                        Console.WriteLine("blet");
+                        var t = smallest;
+                    }
+                    //Console.WriteLine("Smallest sum = " + smallest[^1]);
                 }
+                Console.WriteLine(sum);
+                Fraction final = new(0);
+                foreach (var fr in smallest)
+                {
+                    final += fr;
+                }
+                Console.WriteLine(final.ToString());
             }
 
             void printMatrix(Fraction[,] matrix)
@@ -333,7 +242,7 @@ namespace day_10
             
         }
 
-        public readonly struct Fraction
+        public readonly struct Fraction : IComparable<Fraction>
         {
             public long Num { get; }
             public long Den { get; }
@@ -417,7 +326,6 @@ namespace day_10
             {
                 return a.Num * b.Den >= b.Num * a.Den;
             }
-
             public override bool Equals(object? obj)
             {
                 return obj is Fraction f && this == f;
