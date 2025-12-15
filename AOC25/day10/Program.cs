@@ -76,7 +76,7 @@ namespace day_10
                             }
                         }
                     }
-                    printMatrix(matrix);
+                    //printMatrix(matrix);
 
                     List<int> ConstrainedColumns = [], eliminatedRows = [];
                     for (int col = 0; col < matrix.GetLength(1) - 1; col++)
@@ -128,14 +128,14 @@ namespace day_10
                     {
                         //Console.WriteLine("Row " + x + ": " + (eliminatedRows.Contains(x) ? "E" : "0"));
                     }
-                    printMatrix(matrix);
-                    Console.WriteLine("Gaussian elimination complete");
+                    //printMatrix(matrix);
+                    //Console.WriteLine("Gaussian elimination complete");
 
                     List<int> allColumns = Enumerable.Range(0, matrix.GetLength(1) - 1).ToList();
                     List<int> freeColumns = allColumns.Except(ConstrainedColumns).ToList();
 
                     List<int> attempts = Enumerable.Repeat(0, freeColumns.Count).ToList();
-                    int attMax = 500;
+                    int attMax = joltages[i].Max();
 
                     bool end = false;
                     List<Fraction> buttonSums = [];
@@ -145,8 +145,11 @@ namespace day_10
                         Fraction buttonSum = new(0);
                         for (int l = 0; l < attempts.Count; l++)
                         {
+                            //Console.Write(attempts[l].ToString().PadLeft(4));
                             buttonSum += new Fraction(attempts[l]);
                         }
+                        //Console.WriteLine();
+                        bool badSum = false;
                         for (int k = 0; k < eliminatedRows.Count; k++)
                         {
                             Fraction cellSum = new(0);
@@ -155,14 +158,16 @@ namespace day_10
                                 cellSum += matrix[eliminatedRows[k], freeColumns[l]] * new Fraction(-attempts[l]);
                             }
                             cellSum += matrix[eliminatedRows[k], matrix.GetLength(1) - 1];
-                                buttonSum += cellSum;
-                            if (cellSum < new Fraction(0))
+                            buttonSum += cellSum;
+                            //Console.WriteLine(cellSum);
+
+                            if (cellSum < new Fraction(0) || cellSum.Den != 1)
                             {
+                                badSum = true;
                                 if (prevSums[k] > cellSum)
                                 {
-                                    buttonSum = new Fraction(-1);
-                                    attempts[0] = attMax + 1;
-                                    break;
+                                    //attempts[0] = attMax + 1;
+                                    //break;
                                 }
                             }
                             else
@@ -170,21 +175,18 @@ namespace day_10
                                 prevSums[k] = cellSum;
                             }
                         }
-                        if (buttonSum == new Fraction(-1))
-                        {
-                            attempts[0] = attMax + 1;
-                        }
-                        else
+                        if (!badSum)
                         {
                             buttonSums.Add(buttonSum);
-                            attempts[0]++;
                         }
+                        attempts[0]++;
                         for (int j = 0; j < attempts.Count - 1; j++)
                         {
                             if (attempts[j] > attMax)
                             {
                                 attempts[j] = 0;
                                 attempts[j + 1]++;
+                                prevSums = Enumerable.Repeat(new Fraction(-999), eliminatedRows.Count).ToList();
                             }                            
                         }
                         if (attempts[^1] > attMax)
@@ -203,14 +205,10 @@ namespace day_10
                     }
                     else
                     {
+                        var tt = attempts;
                         smallest.Add(buttonSums.Min());
                     }
-                    if(smallest[^1].Den != 1)
-                    {
-                        Console.WriteLine("blet");
-                        var t = smallest;
-                    }
-                    //Console.WriteLine("Smallest sum = " + smallest[^1]);
+                    Console.WriteLine("Smallest sum = " + smallest[^1]);
                 }
                 Console.WriteLine(sum);
                 Fraction final = new(0);
