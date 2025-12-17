@@ -9,10 +9,9 @@ namespace day_9
     {
         internal static void Main()
         {
-            string[] z = File.ReadAllLines(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName + "\\input.txt");
+            string[] z = File.ReadAllLines(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName + "\\test.txt");
             // Normal
             {
-
                 List<Pt> coords = z.Select(x => new Pt { X = int.Parse(x.Split(",")[0]), Y = int.Parse(x.Split(",")[1]) }).ToList();
 
                 coords = coords.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
@@ -30,10 +29,13 @@ namespace day_9
                 {
                     foreach (Pt p2 in coords)
                     {
-                        long area = (long.Abs(p1.X - p2.X) + 1) * (long.Abs(p1.Y - p2.Y) + 1);
+                        if (p1.X != p2.X && p1.Y != p2.Y)
+                        {
+                            long area = (long.Abs(p1.X - p2.X) + 1) * (long.Abs(p1.Y - p2.Y) + 1);
 
-                        //if (IsRectangleInsidePolygon(coords, p1, p2))
-                            bestArea = Math.Max(bestArea, area);
+                            if (IsRectangleInsidePolygon(coords, conn, p1, p2))
+                                bestArea = Math.Max(bestArea, area);
+                        }
                     }
                 }
                 Console.WriteLine(bestArea);
@@ -131,17 +133,29 @@ namespace day_9
 
         public static bool IsRectangleInsidePolygon(List<Pt> polygon, List<Edge> conn, Pt topLeft, Pt bottomRight)
         {
-            Pt[] corners =
-            [
-                topLeft,
-                new Pt { X = bottomRight.X, Y = topLeft.Y },
-                bottomRight,
-                new Pt { X = topLeft.X, Y = bottomRight.Y }
-            ];
+            //check if any cornerrs inside inner rect
+            if (polygon.Any(p => p.X > topLeft.X && p.X < bottomRight.X && p.Y > topLeft.Y && p.Y < bottomRight.Y))
+                return false;
 
-            foreach (var corner in corners)
-                if (!IsPointInPolygon(polygon, conn, corner))
-                    return false;
+            //check if edges present in inner rect
+            bool isToBottom(Pt p) => p.Y > topLeft.Y || p.Y > bottomRight.Y;
+            bool isToTop(Pt p) => p.Y < topLeft.Y || p.Y < bottomRight.Y;
+            bool isToRight(Pt p) => p.X > topLeft.X || p.X > bottomRight.X;
+            bool isToLeft(Pt p) => p.X < topLeft.X || p.X < bottomRight.X;
+
+            if (conn.Any(e => isToBottom(e.A) && isToTop(e.B) || isToBottom(e.B) && isToTop(e.A) ||
+            isToLeft(e.A) && isToRight(e.B) || isToLeft(e.B) && isToRight(e.A)))
+                return false;
+
+            //check if point inside in the middle is inside
+            Pt mid = new() { X = topLeft.X + bottomRight.X / 2, Y = topLeft.Y + bottomRight.Y / 2 };
+
+            for(int dir = 0; dir < 4; dir++)
+            {
+                int con = IntersectPointConn(conn, mid, dir);
+                if(con != 0)
+                    return con % 2 != 0;
+            }
 
             return true;
         }
